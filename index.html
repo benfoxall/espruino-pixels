@@ -5,12 +5,10 @@
     <title>Neopixel examples</title>
     <link rel="stylesheet" href="milligram.css">
     <style media="screen">
-
     label {
       display: block
     }
     #ui {
-
       margin: 2em 0;
       display: flex;
       height: 3vw;
@@ -20,6 +18,7 @@
     }
     #ui .led::before {
       background: #fff;
+      background: var(--led-color);
       position: absolute;
       content:"";
       border-radius: 100%;
@@ -34,11 +33,12 @@
 
     <h1>E.neopixel examples</h1>
     <div id="ui" aria-hidden="true"></div>
+
     <form>
       <div class="row">
         <label class="column">
           Number of LEDs
-          <input type="number" name="leds" value="16" max="100">
+          <input type="number" name="led_count" value="16" max="100" min="1">
         </label>
         <label class="column">
           Example
@@ -55,8 +55,8 @@
         <textarea name="code" rows="8" cols="80"></textarea>
       </label>
 
-      <input type="submit" value="run" class="btn" />
-      <input type="submit" value="stop" class="btn" />
+      <input type="submit" value="run" />
+      <input type="submit" value="stop" id="stop" class="button button-outline" />
 
     </form>
 
@@ -66,9 +66,100 @@
         led.className = 'led'
         ui.appendChild(led)
       }
+
+
+      function run(code) {
+
+        const head = (function(){
+          function require(what){
+            if(what !== 'neopixel') throw `couldn't load ${what}`
+            return {
+              write: function(PIN, DATA) {
+                postMessage(DATA.join(' '))
+              }
+            }
+          }
+          const B15 = 'B15'
+        }).toString().slice(12,-1)
+
+        const blob = new Blob([head, code])
+        const url = URL.createObjectURL(blob)
+
+        // if there's a worker already running, stop it
+        if(window.esp_worker) {
+          window.esp_worker.terminate()
+        }
+
+        window.esp_worker = new Worker(url)
+        window.esp_worker.addEventListener('message', (e) => {
+
+          var values = e.data.split(' ').map(parseFloat)
+          for (var i = 0; i < ui.children.length; i++) {
+            const idx = i * 3
+            if(values.length < idx + 2) break
+
+            const r = values[idx]
+            const g = values[idx + 1]
+            const b = values[idx + 2]
+
+            ui.children[i].style.setProperty('--led-color', `rgb(${r}, ${g}, ${b})`)
+          }
+        })
+
+      }
+
+      // run('require("neopixel").write(B15, [255,0,0, 0,255,0]);')
+
+      const form = document.querySelector('form')
+      const led_count = document.querySelector('[name=led_count]')
+      const example = document.querySelector('[name=example]')
+      const code = document.querySelector('[name=code]')
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault()
+
+        run(code.value)
+      }, false)
+
+      example.addEventListener('change', function(e){
+        fetch(example.value)
+          .then(resp => resp.text())
+          .then(t => code.value = t)
+
+      }, false)
+
+      // Trigger loading of first one
+      var evt = document.createEvent("HTMLEvents")
+      evt.initEvent("change", false, true)
+      example.dispatchEvent(evt)
+
+
+      led_count.addEventListener('change', function(e){
+        let value = Math.min(parseInt(led_count.value, 10), 100)
+
+        while(ui.firstChild) {ui.firstChild.remove()}
+
+        for (var i = 0; i < value; i++) {
+
+          const led = document.createElement('div')
+          led.className = 'led'
+          ui.appendChild(led)
+        }
+
+      }, false)
+
+
+      document.querySelector('#stop').addEventListener('click', e => {
+        e.preventDefault()
+
+        if(window.esp_worker) {
+          window.esp_worker.terminate()
+          window.esp_worker = null
+        }
+      }, false)
+
+
     </script>
-
-
 
   </div>
   </body>
