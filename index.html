@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8">
     <title>Neopixel examples</title>
-    <link rel="stylesheet" href="milligram.css">
+    <link rel="stylesheet" href="lib/milligram.css">
+    <link rel="stylesheet" href="lib/codemirror.css">
     <style media="screen">
     label {
       display: block
@@ -25,6 +26,13 @@
       height: 4vw;
       width: 4vw;
       box-shadow: rgba(1,1,1,0.2) 1px 2px 3px;
+    }
+
+    .CodeMirror{
+      border: 0.1rem solid #d1d1d1
+    }
+    .CodeMirror-focused{
+      border: 0.1rem solid #9b4dca !important
     }
     </style>
   </head>
@@ -50,6 +58,8 @@
         </label>
       </div>
 
+
+
       <label>
         Code
         <textarea name="code" rows="8" cols="80"></textarea>
@@ -60,6 +70,10 @@
 
     </form>
 
+
+    <script src="lib/codemirror.js"></script>
+    <script src="lib/mode-javascript.js"></script>
+
     <script>
       for (var i = 0; i < 16; i++) {
         const led = document.createElement('div')
@@ -67,6 +81,12 @@
         ui.appendChild(led)
       }
 
+
+      const editor = CodeMirror.fromTextArea(
+        document.querySelector('[name=code]'), {
+        lineNumbers: true,
+        mode:  "javascript"
+      });
 
       function run(code) {
 
@@ -125,7 +145,10 @@
       example.addEventListener('change', function(e){
         fetch(example.value)
           .then(resp => resp.text())
-          .then(t => code.value = t)
+          .then(t => {
+            code.value = t
+            editor.setValue(t)
+          })
 
       }, false)
 
@@ -161,6 +184,8 @@
 
 
     </script>
+
+
 
   </div>
   </body>
