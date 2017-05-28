@@ -70,17 +70,18 @@
 
       function run(code) {
 
-        const head = (function(){
-          function require(what){
-            if(what !== 'neopixel') throw `couldn't load ${what}`
-            return {
-              write: function(PIN, DATA) {
-                postMessage(DATA.join(' '))
-              }
+        const head = `
+        function require(name){
+          if(name !== 'neopixel') throw new Error("couldn't load " + name)
+          return {
+            write: function(PIN, DATA) {
+              postMessage(DATA.join(' '))
             }
           }
-          const B15 = 'B15'
-        }).toString().slice(12,-1)
+        }
+        const B15 = 'B15'
+        const led_count = ${parseInt(led_count.value, 10)}
+        `
 
         const blob = new Blob([head, code])
         const url = URL.createObjectURL(blob)

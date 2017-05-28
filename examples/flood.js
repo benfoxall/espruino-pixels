@@ -1,4 +1,4 @@
-var rgb = new Uint8ClampedArray(50*3);
+var rgb = new Uint8ClampedArray(led_count * 3);
 
 function set(r, g, b, i, s){
   i *= 3;
@@ -18,18 +18,14 @@ var interval;
 
 function flood (r,g,b) {
   floods.unshift([r,g,b,0]);
-  console.log("new flood");
-
 
   if(floods.length > 2) floods.pop()
 
   // start animation loop
   if(floods.length === 1) {
-    console.log("starting");
     interval = setInterval(function(){
 
       // iterate the floods and apply
-
       for(var f = floods.length - 1; f > -1; f--) {
 
         for(var i = 0; i < s; i++) {
@@ -47,7 +43,7 @@ function flood (r,g,b) {
 
         // clean up floods that have passed
         if(floods[f][3] - s > rgb.length / 3) {
-          console.log(floods.pop());
+          floods.pop();
         }
       }
 
@@ -55,14 +51,20 @@ function flood (r,g,b) {
 
       if(floods.length === 0) {
         clearInterval(interval);
-        console.log("stoppped");
       }
     }, 20);
   }
 }
 
+
+// flood red
 flood(255,0,0);
 
+// then green
 setTimeout(() => flood(0,255,0), 1000)
+
+// then blue
 setTimeout(() => flood(0,0,255), 2000)
+
+// then pink
 setTimeout(() => flood(255,0,225), 3000)

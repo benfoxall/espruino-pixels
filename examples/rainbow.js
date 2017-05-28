@@ -1,5 +1,5 @@
-// Produce an animated rainbow over 25 LEDs
-var rgb = new Uint8ClampedArray(25*3);
+// Produce an animated rainbow
+var rgb = new Uint8ClampedArray(led_count * 3);
 var pos = 0;
 function getPattern() {
   pos++;
