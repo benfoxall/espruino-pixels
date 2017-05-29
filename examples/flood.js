@@ -1,3 +1,4 @@
+// Sweep colours through pixels
 var rgb = new Uint8ClampedArray(led_count * 3);
 
 function set(r, g, b, i, s){

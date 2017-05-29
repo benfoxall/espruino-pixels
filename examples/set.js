@@ -1,1 +1,2 @@
-require("neopixel").write(B15, [255,0,0, 0,255,0]);
+// Set the first pixel blue
+require("neopixel").write(B15, [0,150,255]);
